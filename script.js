@@ -85,7 +85,7 @@ const upgrades = [
         level: 0,
         type: 'cps',
         cpsVar: 'creditcardCPS',
-        baseIncreaseDivisor: 100
+        baseIncreaseDivisor: 20
     },
     {
         elem: document.querySelector('.upgrade:nth-child(3)'),
