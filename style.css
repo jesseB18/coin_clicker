@@ -112,15 +112,19 @@ section {
 
 .cost-info {
     display: flex;
-    align-items: center; 
-    gap: 5px; 
+    align-items: center;
+    gap: 5px;
+    justify-content: flex-end;
 }
 
 .cost-info p {
-    margin: 0; 
-    display: flex;
-    align-items: center;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
+
 
 .next-level-info {
     position: fixed;
@@ -179,7 +183,7 @@ section {
     gap: 100px;
     justify-content: center;
     font-weight: bold;
-    font-size: 22px;
+    font-size: 15px;
 }
 
 #upgradeButton {
@@ -191,4 +195,62 @@ section {
     display: block;
     z-index: 1000;
     background-color: grey;
+}
+
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 1000; 
+}
+
+.popup-content {
+    background: rgba(30, 30, 30, 0.9);
+    padding: 30px 40px;
+    border-radius: 12px;
+    text-align: center;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    max-width: 400px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.popup-content .boost {
+    color: #FFD700;
+    margin-top: 10px;
+    font-size: 22px;
+}
+
+.popup-content button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 15px 10px 0 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+
+.popup-content button:hover {
+    transform: scale(1.1);
+}
+
+.popup-content .nee {
+    background-color: #f44336;
+}
+
+#upgradeButton {
+    color: black;
+    background-color: gold;
 }
