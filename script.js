@@ -271,7 +271,7 @@ function resetGame() {
         cpsVars[key] = 0;
     }
 
-    document.body.style.backgroundImage = "url('./assets/background.jpg')";
+    document.body.style.backgroundImage = "url('./assets/background.jpeg')";
     document.body.style.backgroundSize = "cover";
 
     upgrades.forEach(upg => {
@@ -295,7 +295,10 @@ function resetGame() {
     if (btn) btn.remove();
 
     alert(`Rebirth voltooid! Je krijgt een bonus van +${rebirthBonus * 100}% CPS.`);
+
+    saveGame();
 }
+
 
 
 
@@ -404,3 +407,73 @@ function update(time) {
 }
 
 requestAnimationFrame(update);
+setInterval(saveGame, 10000);
+
+
+function saveGame() {
+    const saveData = {
+        parsedcoin,
+        cpc,
+        cpsVars,
+        rebirthCount,
+        rebirthBonus,
+        background: document.body.style.backgroundImage,
+        upgrades: upgrades.map(u => ({
+            level: u.level,
+            cost: u.cost
+        }))
+    };
+
+    localStorage.setItem("clickerSave", JSON.stringify(saveData));
+}
+
+function loadGame() {
+    const data = localStorage.getItem("clickerSave");
+    if (!data) return;
+
+    const save = JSON.parse(data);
+
+    parsedcoin = save.parsedcoin;
+    cpc = save.cpc;
+    Object.assign(cpsVars, save.cpsVars);
+    rebirthCount = save.rebirthCount;
+    rebirthBonus = save.rebirthBonus;
+
+    // background herstellen
+    if (save.background) {
+        document.body.style.backgroundImage = save.background;
+        document.body.style.backgroundSize = "cover";
+    }
+
+    // upgrade levels & kosten herstellen
+    save.upgrades.forEach((s, i) => {
+        upgrades[i].level = s.level;
+        upgrades[i].cost = s.cost;
+
+        upgrades[i].levelElem.innerHTML = s.level;
+        upgrades[i].costElem.innerHTML = formatNumber(s.cost);
+
+        // update increase tekst
+        if (upgrades[i].type === "click") {
+            upgrades[i].increaseElem.innerHTML = formatNumber(cpc);
+        } else {
+            upgrades[i].increaseElem.innerHTML = formatNumber(
+                upgrades[i].type === "click"
+                    ? cpc
+                    : cpsVars[upgrades[i].cpsVar] * (1 + rebirthBonus)
+            );
+
+        }
+        if (upgrades[14].level >= 1) {
+            showButton();
+        }
+    });
+
+    // UI teksten herstellen
+    coin.innerHTML = formatNumber(parsedcoin);
+    cpctext.innerHTML = formatNumber(cpc);
+    cpstext.innerHTML = formatNumber(Object.values(cpsVars).reduce((a, b) => a + b) * (1 + rebirthBonus));
+    rebirthstext.innerHTML = rebirthCount;
+}
+
+loadGame();
