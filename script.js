@@ -28,6 +28,13 @@ let cpsVars = {
 };
 
 function formatNumber(num) {
+    if (num >= 1e39) return (num / 1e39).toFixed(1) + ' tredecillion'
+    if (num >= 1e36) return (num / 1e36).toFixed(1) + ' undecillion'
+    if (num >= 1e33) return (num / 1e33).toFixed(1) + ' decillion'
+    if (num >= 1e30) return (num / 1e30).toFixed(1) + ' nonillion'
+    if (num >= 1e27) return (num / 1e27).toFixed(1) + ' octillion'
+    if (num >= 1e24) return (num / 1e24).toFixed(1) + ' septillion'
+    if (num >= 1e21) return (num / 1e21).toFixed(1) + ' sextillion'
     if (num >= 1e18) return (num / 1e18).toFixed(1) + ' Quintillion';
     if (num >= 1e15) return (num / 1e15).toFixed(1) + ' Quadrillion';
     if (num >= 1e12) return (num / 1e12).toFixed(1) + ' Trillion';
@@ -73,7 +80,7 @@ const upgrades = [
         baseCost: parseFloat(document.querySelector('.clicker-cost').innerHTML),
         level: 0,
         type: 'click',
-        baseIncreaseDivisor: 100
+        baseIncreaseDivisor: 300
     },
     {
         elem: document.querySelector('.upgrade:nth-child(2)'),
