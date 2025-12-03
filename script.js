@@ -407,7 +407,7 @@ function update(time) {
 }
 
 requestAnimationFrame(update);
-setInterval(saveGame, 10000);
+setInterval(saveGame, 100);
 
 
 function saveGame() {
