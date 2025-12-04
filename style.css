@@ -345,3 +345,13 @@ section {
 .shop-popup-content .shop-close-btn {
     background-color: #f44336;
 }
+
+#coins-coin {
+    width: 16px;
+    height: 16px;
+}
+
+#phoenix {
+    width: 24px;
+    height: 24px;
+}
