@@ -34,8 +34,9 @@ section {
     justify-content: center;
     width: 95%;
     max-width: 1200px;
-    height: calc(100vh - 40px);
+    min-height: calc(100vh - 40px);
     box-sizing: border-box;
+    padding-bottom: 140px; /* ensure space below content so statistics doesn't overlap */
 }
 
 .left {
@@ -54,7 +55,7 @@ section {
 .right {
     flex: 1;
     max-width: 700px;
-    height: 80vh;
+    max-height: 80vh;
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 10px;
@@ -143,12 +144,22 @@ section {
 }
 
 .fade-up {
-    animation: fade-up 0.8s forwards;
+    animation: fade-up 1s forwards;
 }
 
 @keyframes fade-up {
     0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
+    100% { transform: translateY(50px) scale(1.2); opacity: 0; }
+}
+
+.fade-down-arc {
+    animation: fade-down-arc 1s forwards;
+}
+
+@keyframes fade-down-arc {
+    0% { transform: translate(0, 0); opacity: 1; }
+    50% { transform: translate(20px, -20px); opacity: 1; }
+    100% { transform: translate(0, -100px); opacity: 0; }
 }
 
 #warning {
@@ -171,8 +182,7 @@ section {
     position: absolute;
     bottom: 0;
     width: 750px;
-    padding: 3.5px;
-    border: 2px white solid;
+    padding: 3px;
     border-top-right-radius: 10px;
     border-top-left-radius: 10px;
     left: 31.5%;
@@ -180,7 +190,7 @@ section {
 
 .texts {
     display: flex;
-    gap: 100px;
+    gap: 70px;
     justify-content: center;
     font-weight: bold;
     font-size: 15px;

@@ -72,8 +72,23 @@ window.incrementCoin = function (event) {
         transform: translate(-50%, -50%);
         text-shadow: 1px 1px 3px black;
     `;
+    
+    const coin_img = document.createElement('img');
+    coin_img.src = './assets/coin.png';
+    coin_img.style.cssText = `
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        top: ${y}px;
+        left: ${x}px;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+    `;
+    document.body.appendChild(coin_img);
+    coin_img.classList.add('fade-down-arc');
+    setTimeout(() => coin_img.remove(), 800);
     document.body.appendChild(div);
-    div.classList.add('fade-up');
+        div.classList.add('fade-up');
     setTimeout(() => div.remove(), 800);
 };
 document.querySelector('.coin-img').addEventListener('click', incrementCoin);
