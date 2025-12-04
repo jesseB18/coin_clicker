@@ -21,6 +21,11 @@ let cpsVars = {
     JupiterCPS: 0,
     SunCPS: 0,
     BlackholeCPS: 0,
+    DimensionalPortalCPS: 0,
+    AstralForgeCPS: 0,
+    CosmicTreasuryCPS: 0,
+    CosmicArchiveCPS: 0,
+    UniversalCurrencyCPS: 0,
 };
 
 let rebirthCount = 0;
@@ -108,6 +113,11 @@ const upgradeConfigs = [
     { name: 'Jupiter', cost: 10000000000000, type: 'cps', cpsVar: 'JupiterCPS', baseIncreaseDivisor: 5, maxLevel: 100 },
     { name: 'Sun', cost: 100000000000000, type: 'cps', cpsVar: 'SunCPS', baseIncreaseDivisor: 5, maxLevel: 100 },
     { name: 'Blackhole', cost: 1000000000000000, type: 'cps', cpsVar: 'BlackholeCPS', baseIncreaseDivisor: 5, diminishing: true },
+    { name: 'DimensionalPortal', cost: 10000000000000000, type: 'cps', cpsVar: 'DimensionalPortalCPS', baseIncreaseDivisor: 5, diminishing: true },
+    { name: 'AstralForge', cost: 100000000000000000, type: 'cps', cpsVar: 'AstralForgeCPS', baseIncreaseDivisor: 5, diminishing: true },
+    { name: 'CosmicTreasury', cost: 1000000000000000000, type: 'cps', cpsVar: 'CosmicTreasuryCPS', baseIncreaseDivisor: 5, diminishing: true },
+    { name: 'CosmicArchive', cost: 10000000000000000000, type: 'cps', cpsVar: 'CosmicArchiveCPS', baseIncreaseDivisor: 5, diminishing: true },
+    { name: 'UniversalCurrency', cost: 100000000000000000000, type: 'cps', cpsVar: 'UniversalCurrencyCPS', baseIncreaseDivisor: 5, diminishing: true },
 ];
 const upgrades = upgradeConfigs.map(cfg => {
     const elem = document.querySelector(`.upgrade.${cfg.name}`);
@@ -232,7 +242,7 @@ upgrades.forEach(upg => {
         if (upg.cpsVar === 'bankCPS' && upg.level === 1) document.body.style.backgroundImage = "url('./assets/city-background.png')";
         else if (upg.cpsVar === 'MercuryCPS' && upg.level === 1) document.body.style.backgroundImage = "url('./assets/planets.png')";
         else if (upg.cpsVar === 'BlackholeCPS' && upg.level === 1) {
-            document.body.style.backgroundImage = "url('./assets/blackhole-background.jpeg')";
+            document.body.style.backgroundImage = "url('./assets/blackhole-background.jpg')";
             showButton();
         }
         document.body.style.backgroundSize = "cover";
