@@ -1,12 +1,9 @@
-// --- Elementen ophalen ---
 let coin = document.querySelector('.coins');
 let parsedcoin = parseFloat(coin.innerHTML);
 let warning = document.getElementById("warning");
 let cpctext = document.querySelector('#cpc-text');
 let cpstext = document.querySelector('#cps-text');
 let rebirthstext = document.querySelector('#rebirths-text');
-
-// --- Game variabelen ---
 let cpc = 1;
 let cpsVars = {
     clickerCPS: 0,
@@ -29,25 +26,17 @@ let cpsVars = {
 let rebirthCount = 0;
 let rebirthBonus = 0;
 let initialBackground = "url('./assets/background.jpg')";
-
-// DOM element for rebirth boost display in statistics
 let rebirthBoostText = document.querySelector('#rebirth-boost');
-
-// Normalize background URL strings from saved data (handle .jpeg/.jpg mismatches)
 function normalizeBackgroundString(bg) {
     if (!bg || typeof bg !== 'string') return bg;
-    // remove surrounding url(...) wrapper for easier replace, preserve wrapper later
     const match = bg.match(/url\((['"]?)(.*)\1\)/);
     if (!match) return bg;
     let inner = match[2];
-    // common replacements
     inner = inner.replace(/\.jpeg$/i, '.jpg');
-    inner = inner.replace(/\\.JPEG$/i, '.jpg');
-    // return wrapped
+    inner = inner.replace(/\.JPEG$/i, '.jpg');
     return `url('${inner}')`;
 }
 
-// --- Number formatter ---
 function formatNumber(num) {
     if (num >= 1e39) return (num / 1e39).toFixed(1) + ' tredecillion';
     if (num >= 1e36) return (num / 1e36).toFixed(1) + ' undecillion';
@@ -64,8 +53,6 @@ function formatNumber(num) {
     if (num >= 1e3) return (num / 1e3).toFixed(1) + ' thousand';
     return Math.round(num);
 }
-
-// --- Coin increment ---
 window.incrementCoin = function (event) {
     parsedcoin += cpc;
     coin.innerHTML = formatNumber(parsedcoin);
@@ -90,10 +77,8 @@ window.incrementCoin = function (event) {
     setTimeout(() => div.remove(), 800);
 };
 document.querySelector('.coin-img').addEventListener('click', incrementCoin);
-
-// --- Upgrade configuratie ---
 const upgradeConfigs = [
-    { name: 'clicker', cost: 10, type: 'click', baseIncreaseDivisor: 300, diminishing: true },
+    { name: 'clicker', cost: 10, type: 'click', baseIncreaseDivisor: 50, diminishing: true },
     { name: 'creditcard', cost: 100, type: 'cps', cpsVar: 'creditcardCPS', baseIncreaseDivisor: 10, maxLevel: 100 },
     { name: 'moneyprinter', cost: 1000, type: 'cps', cpsVar: 'moneyprinterCPS', baseIncreaseDivisor: 10, maxLevel: 100 },
     { name: 'bank', cost: 10000, type: 'cps', cpsVar: 'bankCPS', baseIncreaseDivisor: 10, maxLevel: 100 },
@@ -109,8 +94,6 @@ const upgradeConfigs = [
     { name: 'Sun', cost: 100000000000000, type: 'cps', cpsVar: 'SunCPS', baseIncreaseDivisor: 5, maxLevel: 100 },
     { name: 'Blackhole', cost: 1000000000000000, type: 'cps', cpsVar: 'BlackholeCPS', baseIncreaseDivisor: 5, diminishing: true },
 ];
-
-// --- Upgrade object mapping (guard against missing DOM nodes) ---
 const upgrades = upgradeConfigs.map(cfg => {
     const elem = document.querySelector(`.upgrade.${cfg.name}`);
     const costElem = elem ? elem.querySelector(`.${cfg.name}-cost`) : null;
@@ -128,16 +111,12 @@ const upgrades = upgradeConfigs.map(cfg => {
         level: 0
     };
 });
-
-// --- Info box voor next-level ---
 let infoBox = document.createElement('div');
 infoBox.className = 'next-level-info';
 infoBox.style.position = 'absolute';
 infoBox.style.display = 'none';
 infoBox.style.pointerEvents = 'none';
 document.body.appendChild(infoBox);
-
-// --- Rebirth functies ---
 function resetGame() {
     const blackholeUpg = upgrades.find(u => u.cpsVar === "BlackholeCPS");
     const blackholeLevel = blackholeUpg ? blackholeUpg.level : 0;
@@ -163,7 +142,6 @@ function resetGame() {
     cpctext.innerHTML = formatNumber(cpc);
     cpstext.innerHTML = formatNumber(0);
     rebirthstext.innerHTML = rebirthCount;
-    // update any rebirth/blackhole displays
     updateRebirthBoostDisplay();
 
     const btn = document.getElementById("upgradeButton");
@@ -236,8 +214,6 @@ upgrades.forEach(upg => {
 
         upg.cost *= 1.2;
         upg.costElem.innerHTML = formatNumber(upg.cost);
-
-        // Speciale backgrounds
         if (upg.cpsVar === 'bankCPS' && upg.level === 1) document.body.style.backgroundImage = "url('./assets/city-background.png')";
         else if (upg.cpsVar === 'MercuryCPS' && upg.level === 1) document.body.style.backgroundImage = "url('./assets/planets.png')";
         else if (upg.cpsVar === 'BlackholeCPS' && upg.level === 1) {
@@ -247,8 +223,6 @@ upgrades.forEach(upg => {
         document.body.style.backgroundSize = "cover";
     });
 });
-
-// --- Realtime infoBox ---
 upgrades.forEach(upg => {
     if (!upg.elem) return;
     let rafId;
@@ -271,8 +245,6 @@ upgrades.forEach(upg => {
         cancelAnimationFrame(rafId);
     });
 });
-
-// --- CPS update loop ---
 let lastTime = performance.now();
 function update(time) {
     let delta = (time - lastTime) / 1000;
@@ -291,8 +263,6 @@ function update(time) {
     requestAnimationFrame(update);
 }
 requestAnimationFrame(update);
-
-// --- Opslaan en laden ---
 function saveGame() {
     const saveData = {
         parsedcoin,
@@ -332,16 +302,13 @@ function loadGame() {
             else upg.increaseElem.innerHTML = formatNumber(cpsVars[upg.cpsVar] * (1 + rebirthBonus));
         }
     });
-    // If Blackhole (index 14) exists and has level, show rebirth button
     if (upgrades[14] && upgrades[14].level >= 1) showButton();
     coin.innerHTML = formatNumber(parsedcoin);
     cpctext.innerHTML = formatNumber(cpc);
     cpstext.innerHTML = formatNumber(Object.values(cpsVars).reduce((a, b) => a + b, 0) * (1 + rebirthBonus));
     rebirthstext.innerHTML = rebirthCount;
-    // ensure rebirth boost is shown correctly
     updateRebirthBoostDisplay();
 }
-// Helper: keep rebirth boost displays in sync
 function updateRebirthBoostDisplay() {
     const pct = Math.round(rebirthBonus * 100);
     const text = `+${pct}%`;
@@ -349,7 +316,5 @@ function updateRebirthBoostDisplay() {
     if (blackholeEl) blackholeEl.textContent = text;
     if (rebirthBoostText) rebirthBoostText.textContent = text;
 }
-
-// Initialize rebirth boost display on script load
 updateRebirthBoostDisplay();
 loadGame();
