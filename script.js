@@ -32,14 +32,18 @@ let rebirthCount = 0;
 let rebirthBonus = 0;
 let initialBackground = "url('./assets/background.jpg')";
 let rebirthBoostText = document.querySelector('#rebirth-boost');
+
 function normalizeBackgroundString(bg) {
-    if (!bg || typeof bg !== 'string') return bg;
-    const match = bg.match(/url\((['"]?)(.*)\1\)/);
-    if (!match) return bg;
-    let inner = match[2];
-    inner = inner.replace(/\.jpeg$/i, '.jpg');
-    inner = inner.replace(/\.JPEG$/i, '.jpg');
-    return `url('${inner}')`;
+    if (!bg || typeof bg !== 'string') return initialBackground;
+    const match = bg.match(/url\(['"]?(.+?)['"]?\)/);
+    if (!match) return initialBackground;
+    let path = match[1];
+    if (path.includes('/assets/')) {
+        path = path.substring(path.indexOf('/assets/'));
+        path = '.' + path;
+    }
+    path = path.replace(/\.jpeg$/i, '.jpg');
+    return `url('${path}')`;
 }
 
 function formatNumber(num) {
@@ -58,6 +62,7 @@ function formatNumber(num) {
     if (num >= 1e3) return (num / 1e3).toFixed(1) + ' thousand';
     return Math.round(num);
 }
+
 window.incrementCoin = function (event) {
     parsedcoin += cpc;
     coin.innerHTML = formatNumber(parsedcoin);
@@ -93,10 +98,12 @@ window.incrementCoin = function (event) {
     coin_img.classList.add('fade-down-arc');
     setTimeout(() => coin_img.remove(), 800);
     document.body.appendChild(div);
-        div.classList.add('fade-up');
+    div.classList.add('fade-up');
     setTimeout(() => div.remove(), 800);
 };
+
 document.querySelector('.coin-img').addEventListener('click', incrementCoin);
+
 const upgradeConfigs = [
     { name: 'clicker', cost: 10, type: 'click', baseIncreaseDivisor: 50, diminishing: true },
     { name: 'creditcard', cost: 100, type: 'cps', cpsVar: 'creditcardCPS', baseIncreaseDivisor: 10, maxLevel: 100 },
@@ -119,6 +126,7 @@ const upgradeConfigs = [
     { name: 'CosmicArchive', cost: 10000000000000000000, type: 'cps', cpsVar: 'CosmicArchiveCPS', baseIncreaseDivisor: 5, maxLevel: 50 },
     { name: 'UniversalCurrency', cost: 100000000000000000000, type: 'cps', cpsVar: 'UniversalCurrencyCPS', baseIncreaseDivisor: 5, maxLevel: 50},
 ];
+
 const upgrades = upgradeConfigs.map(cfg => {
     const elem = document.querySelector(`.upgrade.${cfg.name}`);
     const costElem = elem ? elem.querySelector(`.${cfg.name}-cost`) : null;
@@ -136,12 +144,18 @@ const upgrades = upgradeConfigs.map(cfg => {
         level: 0
     };
 });
+
+upgrades.forEach(upg => {
+    if (upg.costElem) upg.costElem.innerHTML = formatNumber(upg.cost);
+});
+
 let infoBox = document.createElement('div');
 infoBox.className = 'next-level-info';
 infoBox.style.position = 'absolute';
 infoBox.style.display = 'none';
 infoBox.style.pointerEvents = 'none';
 document.body.appendChild(infoBox);
+
 function resetGame() {
     const blackholeUpg = upgrades.find(u => u.cpsVar === "BlackholeCPS");
     const blackholeLevel = blackholeUpg ? blackholeUpg.level : 0;
@@ -204,7 +218,6 @@ function showButton() {
     });
 }
 
-// --- Upgrade clicks ---
 upgrades.forEach(upg => {
     if (!upg.elem) return;
     upg.elem.addEventListener('click', () => {
@@ -242,12 +255,13 @@ upgrades.forEach(upg => {
         if (upg.cpsVar === 'bankCPS' && upg.level === 1) document.body.style.backgroundImage = "url('./assets/city-background.png')";
         else if (upg.cpsVar === 'MercuryCPS' && upg.level === 1) document.body.style.backgroundImage = "url('./assets/planets.png')";
         else if (upg.cpsVar === 'BlackholeCPS' && upg.level === 1) {
-            document.body.style.backgroundImage = "url('./assets/blackhole-background.jpg')";
+            document.body.style.backgroundImage = "url('./assets/blackhole-background.jpeg')";
             showButton();
         }
         document.body.style.backgroundSize = "cover";
     });
 });
+
 upgrades.forEach(upg => {
     if (!upg.elem) return;
     let rafId;
@@ -270,6 +284,39 @@ upgrades.forEach(upg => {
         cancelAnimationFrame(rafId);
     });
 });
+
+const rebirthShopBtn = document.getElementById('rebirthShopBtn');
+const shopPopup = document.getElementById('shopPopup');
+const shopCloseBtn = document.getElementById('shopCloseBtn');
+const shopSelectBtn = document.getElementById('shopSelectBtn');
+
+if (rebirthShopBtn && shopPopup) {
+    rebirthShopBtn.addEventListener('click', function() {
+        shopPopup.classList.add('active');
+    });
+}
+
+if (shopCloseBtn && shopPopup) {
+    shopCloseBtn.addEventListener('click', function() {
+        shopPopup.classList.remove('active');
+    });
+}
+
+if (shopSelectBtn && shopPopup) {
+    shopSelectBtn.addEventListener('click', function() {
+        alert('Item geselecteerd!');
+        shopPopup.classList.remove('active');
+    });
+}
+
+if (shopPopup) {
+    shopPopup.addEventListener('click', function(e) {
+        if (e.target === shopPopup) {
+            shopPopup.classList.remove('active');
+        }
+    });
+}
+
 let lastTime = performance.now();
 function update(time) {
     let delta = (time - lastTime) / 1000;
@@ -288,6 +335,7 @@ function update(time) {
     requestAnimationFrame(update);
 }
 requestAnimationFrame(update);
+
 function saveGame() {
     const saveData = {
         parsedcoin,
@@ -334,6 +382,7 @@ function loadGame() {
     rebirthstext.innerHTML = rebirthCount;
     updateRebirthBoostDisplay();
 }
+
 function updateRebirthBoostDisplay() {
     const pct = Math.round(rebirthBonus * 100);
     const text = `+${pct}%`;
@@ -341,5 +390,6 @@ function updateRebirthBoostDisplay() {
     if (blackholeEl) blackholeEl.textContent = text;
     if (rebirthBoostText) rebirthBoostText.textContent = text;
 }
+
 updateRebirthBoostDisplay();
 loadGame();

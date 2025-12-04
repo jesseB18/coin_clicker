@@ -13,8 +13,6 @@ body {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    height: 100vh;
-    margin: 0;  
 }
 
 section {
@@ -36,7 +34,8 @@ section {
     max-width: 1200px;
     min-height: calc(100vh - 40px);
     box-sizing: border-box;
-    padding-bottom: 140px; /* ensure space below content so statistics doesn't overlap */
+    padding-bottom: 20px;
+    position: relative;
 }
 
 .left {
@@ -52,10 +51,14 @@ section {
     order: -1; 
 }
 
+.coin-img {
+    cursor: pointer;
+}
+
 .right {
     flex: 1;
     max-width: 700px;
-    max-height: 80vh;
+    max-height: calc(100vh - 160px);
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 10px;
@@ -63,6 +66,7 @@ section {
     background-color: transparent;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    margin-top: 25px;
 }
 
 .right::-webkit-scrollbar {
@@ -107,9 +111,8 @@ section {
 .coin-image {
     width: 25px;
     height: 25px;
+    cursor: pointer;
 }
-
-
 
 .cost-info {
     display: flex;
@@ -125,7 +128,6 @@ section {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
 
 .next-level-info {
     position: fixed;
@@ -179,21 +181,22 @@ section {
 }
 
 .statistics {
-    position: absolute;
+    position: fixed;
     bottom: 0;
-    width: 750px;
-    padding: 3px;
-    border-top-right-radius: 10px;
-    border-top-left-radius: 10px;
-    left: 31.5%;
+    left: 57%;
+    transform: translateX(-50%);
+    width: 900px;
+    z-index: 100;
+    margin-bottom: 25px;
 }
 
 .texts {
     display: flex;
-    gap: 70px;
+    gap: 25px;
     justify-content: center;
     font-weight: bold;
     font-size: 15px;
+    flex-wrap: wrap;
 }
 
 #upgradeButton {
@@ -204,9 +207,13 @@ section {
     font-size: 16px;
     display: block;
     z-index: 1000;
-    background-color: grey;
+    background-color: gold;
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
 }
-
 
 .popup {
     position: fixed;
@@ -260,7 +267,81 @@ section {
     background-color: #f44336;
 }
 
-#upgradeButton {
+.rebirth-shop-btn {
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: #FFD700;
     color: black;
-    background-color: gold;
+    border: none;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.rebirth-shop-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.shop-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+}
+
+.shop-popup.active {
+    display: flex;
+}
+
+.shop-popup-content {
+    background: rgba(30, 30, 30, 0.9);
+    padding: 30px 40px;
+    border-radius: 12px;
+    text-align: center;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    max-width: 400px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.shop-popup-content h2 {
+    margin-top: 0;
+    color: #FFD700;
+}
+
+.shop-popup-content .menu-item {
+    color: #FFD700;
+    margin: 15px 0;
+    font-size: 18px;
+}
+
+.shop-popup-content button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 15px 10px 0 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+
+.shop-popup-content button:hover {
+    transform: scale(1.1);
+}
+
+.shop-popup-content .shop-close-btn {
+    background-color: #f44336;
 }
