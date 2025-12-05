@@ -324,6 +324,14 @@ section {
     color: #FFD700;
     margin: 15px 0;
     font-size: 18px;
+    padding: 10px;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.menu-item.selected {
+    border: 2px solid white;
+    scale: 1.1;
 }
 
 .shop-popup-content button {
@@ -354,4 +362,11 @@ section {
 #phoenix {
     width: 24px;
     height: 24px;
+}
+
+#info-box {
+    width: 200px;
+    padding: 10px;
+    border: 2px solid white;
+    margin-left: 20px;
 }

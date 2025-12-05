@@ -270,7 +270,7 @@
                     <div class="right-section">
                         Level <span class="Sun-level">0</span><br>
                         cps: <span class="Sun-increase">0</span><br>
-                        max Level: 100
+                        Max Level: 100
                     </div>
                 </div>
 
@@ -408,13 +408,43 @@
     <div id="shopPopup" class="shop-popup">
         <div class="shop-popup-content">
             <h2>Rebirth Shop</h2>
-            <div class="menu-item"><img src="./assets/Clickerhand.png" alt=""> arjan's clicker </div> <!---100% more cpc--->
-            <div class="menu-item"><img src="./assets/more-coins-removebg-preview.png" alt="" id="coins-coin"> more coins coin </div> <!---50% more cps--->
-            <div class="menu-item"><img src="./assets/pheonix.jpeg" alt="" id="phoenix"> power of the phoenix</div> <!---2x rebirths/boost--->
-            <button id="shopSelectBtn" class="shop-select-btn">Select</button>
-            <button id="shopCloseBtn" class="shop-close-btn">Close</button>
+
+        <div class="menu-item" id="upg1" 
+                data-title="Power of the Phoenix"
+                data-desc="Upon rebirth, you awaken with the power of the Phoenix itself! <br><br> 2x rebirths"
+                data-price="1" 
+                data-effect="doubleUpgrade">
+                <img src="./assets/pheonix.jpeg" alt="" id="phoenix">
+                Power of the Phoenix
         </div>
+
+        <div class="menu-item" id="upg2" 
+            data-title="Arjan's Clicker"
+            data-desc="The clicker is not overpowered enough! <br><br> +100% CPC" 
+            data-price="2" 
+            data-effect="cpcBoost">
+            <img src="./assets/Clickerhand.png" alt="">
+            Arjan's Clicker
+        </div>
+
+        <div class="menu-item" id="upg3" 
+            data-title="Quantum Coin"
+            data-desc="This upgrade infuses your coins with raw energy! <br><br> +50% CPS" 
+            data-price="4"
+            data-effect="cpsBoost">
+            <img src="./assets/more-coins-removebg-preview.png" alt="" id="coins-coin">
+            Quantum Coin
+        </div>
+
+        <button id="shopbuyBtn" class="shop-select-btn">buy</button>
+        <button id="shopCloseBtn" class="shop-close-btn">Close</button>
     </div>
+    <div id="info-box">
+        <h2 id="info-title">Selecteer een upgrade</h2>
+        <p id="info-desc">Klik op een item om info te zien.</p>
+    </div>
+    </div>
+
 
     <script src="./script.js"></script>
 </body>
