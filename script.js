@@ -15,9 +15,10 @@ let parsedcoin = parseFloat(coin.innerHTML);
 let cpc = 1; // Coins per click
 let rebirthCount = 0;
 let rebirthBonus = 0;
-window.cpcMultiplier = 1;
-window.cpsMultiplier = 1;
-window.rebirthMultiplier = 1;
+let purchasedUpgrades = []; // Array om gekochte shop upgrades op te slaan
+let cpcMultiplier = 1; // Extra CPC multiplier van shop upgrades
+let cpsMultiplier = 1; // Extra CPS multiplier van shop upgrades
+window.phoenixMultiplier = 1; // Phoenix multiplier voor rebirth bonus
 
 // Background settings
 let initialBackground = "url('./assets/background.jpg')";
@@ -71,21 +72,21 @@ function formatNumber(num) {
 // Normaliseert background URL voor opslaan/laden
 function normalizeBackgroundString(bg) {
     if (!bg || typeof bg !== 'string') return initialBackground;
-
+    
     const match = bg.match(/url\(['"]?(.+?)['"]?\)/);
     if (!match) return initialBackground;
-
+    
     let path = match[1];
-
+    
     // Zet absolute URL om naar relatieve URL
     if (path.includes('/assets/')) {
         path = path.substring(path.indexOf('/assets/'));
         path = '.' + path;
     }
-
+    
     // Normaliseer extensie
     path = path.replace(/\.jpeg$/i, '.jpg');
-
+    
     return `url('${path}')`;
 }
 
@@ -94,13 +95,14 @@ function normalizeBackgroundString(bg) {
 // ===================================
 
 window.incrementCoin = function (event) {
-    // Voeg coins toe
-    parsedcoin += cpc;
+    // Voeg coins toe met CPC multiplier
+    const totalCPC = cpc * cpcMultiplier;
+    parsedcoin += totalCPC;
     coin.innerHTML = formatNumber(parsedcoin);
 
     // Maak +coins animatie tekst
     const div = document.createElement('div');
-    div.innerHTML = `+${formatNumber(cpc)}`;
+    div.innerHTML = `+${formatNumber(totalCPC)}`;
     const x = event.clientX;
     const y = event.clientY;
     div.style.cssText = `
@@ -114,7 +116,7 @@ window.incrementCoin = function (event) {
         transform: translate(-50%, -50%);
         text-shadow: 1px 1px 3px black;
     `;
-
+    
     // Maak coin afbeelding animatie
     const coin_img = document.createElement('img');
     coin_img.src = './assets/coin.png';
@@ -127,12 +129,12 @@ window.incrementCoin = function (event) {
         pointer-events: none;
         transform: translate(-50%, -50%);
     `;
-
+    
     // Voeg elementen toe en verwijder ze na animatie
     document.body.appendChild(coin_img);
     coin_img.classList.add('fade-down-arc');
     setTimeout(() => coin_img.remove(), 800);
-
+    
     document.body.appendChild(div);
     div.classList.add('fade-up');
     setTimeout(() => div.remove(), 800);
@@ -165,7 +167,7 @@ const upgradeConfigs = [
     { name: 'AstralForge', cost: 100000000000000000, type: 'cps', cpsVar: 'AstralForgeCPS', baseIncreaseDivisor: 5, maxLevel: 50 },
     { name: 'CosmicTreasury', cost: 1000000000000000000, type: 'cps', cpsVar: 'CosmicTreasuryCPS', baseIncreaseDivisor: 5, maxLevel: 50 },
     { name: 'CosmicArchive', cost: 10000000000000000000, type: 'cps', cpsVar: 'CosmicArchiveCPS', baseIncreaseDivisor: 5, maxLevel: 50 },
-    { name: 'UniversalCurrency', cost: 100000000000000000000, type: 'cps', cpsVar: 'UniversalCurrencyCPS', baseIncreaseDivisor: 5, maxLevel: 50 },
+    { name: 'UniversalCurrency', cost: 100000000000000000000, type: 'cps', cpsVar: 'UniversalCurrencyCPS', baseIncreaseDivisor: 5, maxLevel: 50},
 ];
 
 // Maak upgrade objecten met HTML elementen
@@ -174,9 +176,9 @@ const upgrades = upgradeConfigs.map(cfg => {
     const costElem = elem ? elem.querySelector(`.${cfg.name}-cost`) : null;
     const levelElem = elem ? elem.querySelector(`.${cfg.name}-level`) : null;
     const increaseElem = elem ? elem.querySelector(`.${cfg.name}-increase`) : null;
-
+    
     if (!elem) console.warn(`Upgrade element not found for: ${cfg.name}`);
-
+    
     return {
         ...cfg,
         elem,
@@ -214,10 +216,14 @@ function resetGame() {
     const blackholeUpg = upgrades.find(u => u.cpsVar === "BlackholeCPS");
     const blackholeLevel = blackholeUpg ? blackholeUpg.level : 0;
 
-    // Bereken en voeg rebirth bonus toe
-    rebirthBonus += blackholeLevel * 0.01;
-    rebirthCount++;
-
+    // Bereken rebirth bonus (Phoenix multiplier beïnvloedt dit NIET)
+    const bonusIncrease = blackholeLevel * 0.01;
+    rebirthBonus += bonusIncrease;
+    
+    // Phoenix upgrade: verdubbelt hoeveel rebirths je KRIJGT per rebirth
+    const rebirthsGained = window.phoenixMultiplier || 1;
+    rebirthCount += rebirthsGained;
+    
     // Reset game stats
     parsedcoin = 0;
     cpc = 1;
@@ -238,7 +244,7 @@ function resetGame() {
 
     // Update UI
     coin.innerHTML = formatNumber(parsedcoin);
-    cpctext.innerHTML = formatNumber(cpc);
+    cpctext.innerHTML = formatNumber(cpc * cpcMultiplier);
     cpstext.innerHTML = formatNumber(0);
     rebirthstext.innerHTML = rebirthCount;
     updateRebirthBoostDisplay();
@@ -247,13 +253,14 @@ function resetGame() {
     const btn = document.getElementById("upgradeButton");
     if (btn) btn.remove();
 
-    alert(`Rebirth voltooid! Je Blackhole level gaf een bonus van +${blackholeLevel}%!`);
+    const phoenixText = window.phoenixMultiplier > 1 ? ` Je kreeg ${rebirthsGained} rebirths (Phoenix bonus!)` : '';
+    alert(`Rebirth voltooid! Je Blackhole level gaf een bonus van +${Math.round(bonusIncrease * 100)}%.${phoenixText}`);
     saveGame();
 }
 
 function showButton() {
     const popup = document.querySelector('.popup');
-
+    
     // Maak rebirth knop aan (als die nog niet bestaat)
     if (!document.getElementById("upgradeButton")) {
         const button = document.createElement("button");
@@ -273,65 +280,16 @@ function showButton() {
     // Koppel popup knoppen
     const jaKnop = popup.querySelector('.ja');
     const neeKnop = popup.querySelector('.nee');
-
+    
     jaKnop.addEventListener('click', () => {
         resetGame();
         popup.style.display = 'none';
     });
-
+    
     neeKnop.addEventListener('click', () => {
         popup.style.display = 'none';
     });
 }
-
-const items = document.querySelectorAll('.menu-item');
-
-const infoTitle = document.getElementById('info-title');
-const infoDesc = document.getElementById('info-desc');
-
-items.forEach(item => {
-    item.addEventListener('click', () => {
-        items.forEach(i => i.classList.remove('selected'));
-        item.classList.add('selected');
-        infoTitle.textContent = item.dataset.title;
-        infoDesc.innerHTML = item.dataset.desc;
-    });
-});
-
-document.getElementById("shopbuyBtn").addEventListener("click", () => {
-    const selected = document.querySelector(".menu-item.selected");
-    if (!selected) return;
-
-    const price = parseInt(selected.dataset.price);
-    if (rebirthCount < price) {
-        warning.innerHTML = "Niet genoeg rebirths!";
-        warning.style.display = "block";
-        setTimeout(() => warning.style.display = "none", 3000);
-        return;
-    }
-
-    rebirthCount -= price;
-    rebirthstext.textContent = rebirthCount;
-
-    const effect = selected.dataset.effect;
-
-    if (effect === "cpcBoost") {
-        window.cpcMultiplier = 2; // alleen click upgrades
-        warning.innerHTML = "Alle toekomstige click upgrades geven nu 2x CPC!";
-    } else if (effect === "cpsBoost") {
-        window.cpsMultiplier = 1.5; // alleen cps upgrades
-        warning.innerHTML = "Alle toekomstige CPS upgrades geven nu 1.5x CPS!";
-    } else if (effect === "rebirthBoost") {
-        window.rebirthMultiplier = 2; // verdubbel rebirth
-        warning.innerHTML = "Toekomstige rebirths geven nu 2x zoveel!";
-    }
-
-
-    warning.style.display = "block";
-    setTimeout(() => warning.style.display = "none", 3000);
-
-    selected.remove();
-});
 
 function updateRebirthBoostDisplay() {
     const pct = Math.round(rebirthBonus * 100);
@@ -347,15 +305,17 @@ function updateRebirthBoostDisplay() {
 
 upgrades.forEach(upg => {
     if (!upg.elem) return;
-
+    
     upg.elem.addEventListener('click', () => {
+        // Check of upgrade max level heeft bereikt
         if (upg.maxLevel && upg.level >= upg.maxLevel) {
             warning.innerHTML = "Deze upgrade is maximaal!";
             warning.style.display = "block";
             setTimeout(() => warning.style.display = "none", 2000);
             return;
         }
-
+        
+        // Check of speler genoeg coins heeft
         if (parsedcoin < upg.cost) {
             warning.innerHTML = "Niet genoeg coins!";
             warning.style.display = "block";
@@ -363,38 +323,43 @@ upgrades.forEach(upg => {
             return;
         }
 
-        // Bereken basis increase
+        // Bereken hoeveel CPC/CPS deze upgrade geeft
         let increase = upg.cost / upg.baseIncreaseDivisor;
         if (upg.diminishing) increase /= (1 + upg.level * 0.05);
         increase = Math.max(1, Math.round(increase));
 
-        // Toepassen van de juiste multiplier
-        if (upg.type === 'click') {
-            nextIncrease *= (window.cpcMultiplier || 1);
-        } else if (upg.type === 'cps') {
-            nextIncrease *= (window.cpsMultiplier || 1);
-            nextIncrease *= (1 + rebirthBonus);
-        }
-
-
+        // Trek kosten af en verhoog level
         parsedcoin -= upg.cost;
         upg.level++;
-        if (upg.levelElem) upg.levelElem.innerHTML = upg.level;
+        upg.levelElem.innerHTML = upg.level;
 
+        // Update CPC of CPS
         if (upg.type === 'click') {
             cpc += increase;
-            if (upg.increaseElem) upg.increaseElem.innerHTML = formatNumber(cpc);
+            if (upg.increaseElem) upg.increaseElem.innerHTML = formatNumber(cpc * cpcMultiplier);
         } else {
             cpsVars[upg.cpsVar] += increase;
-            if (upg.increaseElem) upg.increaseElem.innerHTML = formatNumber(cpsVars[upg.cpsVar] * (1 + rebirthBonus));
+            if (upg.increaseElem) upg.increaseElem.innerHTML = formatNumber(cpsVars[upg.cpsVar] * (1 + rebirthBonus) * cpsMultiplier);
         }
 
+        // Verhoog kosten voor volgende level
         upg.cost *= 1.2;
-        if (upg.costElem) upg.costElem.innerHTML = formatNumber(upg.cost);
+        upg.costElem.innerHTML = formatNumber(upg.cost);
+        
+        // Speciale acties voor bepaalde upgrades
+        if (upg.name === 'bank' && upg.level === 1) {
+            document.body.style.backgroundImage = "url('./assets/city-background.png')";
+            document.body.style.backgroundSize = "cover";
+        } else if (upg.name === 'Mercury' && upg.level === 1) {
+            document.body.style.backgroundImage = "url('./assets/planets.png')";
+            document.body.style.backgroundSize = "cover";
+        } else if (upg.name === 'Blackhole' && upg.level === 1) {
+            document.body.style.backgroundImage = "url('./assets/blackhole-background.jpeg')";
+            document.body.style.backgroundSize = "cover";
+            showButton();
+        }
     });
 });
-
-
 
 // ===================================
 // UPGRADE HOVER EVENTS (info box)
@@ -403,44 +368,51 @@ upgrades.forEach(upg => {
 upgrades.forEach(upg => {
     if (!upg.elem) return;
     let rafId;
-
+    
     upg.elem.addEventListener('mouseenter', () => {
         infoBox.style.display = 'block';
-
+        
         function updateInfo() {
             const rect = upg.elem.getBoundingClientRect();
             infoBox.style.top = `${rect.top}px`;
             infoBox.style.left = `${rect.right + 10}px`;
-
-            // Bereken volgende level
+            
+            // Bereken wat volgende level geeft (base)
             let nextIncrease = upg.cost / upg.baseIncreaseDivisor;
             if (upg.diminishing) nextIncrease /= (1 + upg.level * 0.05);
             nextIncrease = Math.max(1, Math.round(nextIncrease));
-
-            // Pas multiplier en rebirth bonus toe
+            
             if (upg.type === 'click') {
-                nextIncrease *= window.upgradeMultiplier;
+                // Voor CPC upgrades
+                let baseCPC = cpc;
+                let boostedCPC = cpc * cpcMultiplier;
+                infoBox.innerHTML = `
+                    Volgende: +${formatNumber(nextIncrease)} cpc<br>
+                    Base CPC: ${formatNumber(baseCPC)}<br>
+                    Totaal CPC: ${formatNumber(boostedCPC)}
+                `;
             } else {
-                nextIncrease *= window.upgradeMultiplier;
-                nextIncrease *= (1 + rebirthBonus);
+                // Voor CPS upgrades - pas ALLE boosts toe
+                let nextIncreaseBoosted = Math.round(nextIncrease * (1 + rebirthBonus) * cpsMultiplier);
+                let baseCPS = cpsVars[upg.cpsVar];
+                let boostedCPS = baseCPS * (1 + rebirthBonus) * cpsMultiplier;
+                infoBox.innerHTML = `
+                    Volgende: +${formatNumber(nextIncreaseBoosted)} cps<br>
+                    Base CPS: ${formatNumber(baseCPS)}<br>
+                    Met boost: ${formatNumber(boostedCPS)}
+                `;
             }
-
-            infoBox.innerHTML = upg.type === 'click'
-                ? `Volgende: +${formatNumber(nextIncrease)} cpc`
-                : `Volgende: +${formatNumber(nextIncrease)} cps`;
-
+            
             rafId = requestAnimationFrame(updateInfo);
         }
-
         rafId = requestAnimationFrame(updateInfo);
     });
-
+    
     upg.elem.addEventListener('mouseleave', () => {
         infoBox.style.display = 'none';
         cancelAnimationFrame(rafId);
     });
 });
-
 
 // ===================================
 // REBIRTH SHOP POPUP
@@ -449,35 +421,178 @@ upgrades.forEach(upg => {
 const rebirthShopBtn = document.getElementById('rebirthShopBtn');
 const shopPopup = document.getElementById('shopPopup');
 const shopCloseBtn = document.getElementById('shopCloseBtn');
-const shopSelectBtn = document.getElementById('shopSelectBtn');
+const shopBuyBtn = document.getElementById('shopbuyBtn');
+
+// Info box elementen
+const infoBoxElement = document.getElementById('info-box');
+const infoTitle = document.getElementById('info-title');
+const infoDesc = document.getElementById('info-desc');
+
+let selectedUpgrade = null;
 
 // Open shop popup
 if (rebirthShopBtn && shopPopup) {
-    rebirthShopBtn.addEventListener('click', function () {
-        shopPopup.classList.add('active');
+    rebirthShopBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        shopPopup.style.display = 'flex';
+        infoBoxElement.style.display = 'block'; // Toon info box
+        setTimeout(() => shopPopup.classList.add('active'), 10);
     });
+} else {
+    console.error('Shop elements not found!');
 }
 
 // Sluit shop popup
 if (shopCloseBtn && shopPopup) {
-    shopCloseBtn.addEventListener('click', function () {
+    shopCloseBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
         shopPopup.classList.remove('active');
+        setTimeout(() => shopPopup.style.display = 'none', 10);
+        infoBoxElement.style.display = 'none'; // Verberg info box
+        selectedUpgrade = null;
+        // Reset info box
+        infoTitle.textContent = 'Selecteer een upgrade';
+        infoDesc.innerHTML = 'Klik op een item om info te zien.';
     });
 }
 
-// Select knop in shop
-if (shopSelectBtn && shopPopup) {
-    shopSelectBtn.addEventListener('click', function () {
-        alert('Item geselecteerd!');
+// Buy knop in shop
+if (shopBuyBtn && shopPopup) {
+    shopBuyBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (!selectedUpgrade) {
+            showGameNotification('Selecteer eerst een upgrade!', 'error');
+            return;
+        }
+        
+        const upgradeId = selectedUpgrade.id;
+        const price = parseInt(selectedUpgrade.dataset.price);
+        const upgradeName = selectedUpgrade.dataset.title;
+        const effect = selectedUpgrade.dataset.effect;
+        
+        // Check of upgrade al is gekocht
+        if (purchasedUpgrades.includes(upgradeId)) {
+            showGameNotification('Je hebt deze upgrade al gekocht!', 'error');
+            return;
+        }
+        
+        // Check of speler genoeg rebirths heeft
+        if (rebirthCount < price) {
+            showGameNotification(`Je hebt ${price} rebirths nodig! Je hebt er ${rebirthCount}.`, 'error');
+            return;
+        }
+        
+        // Trek rebirths af
+        rebirthCount -= price;
+        rebirthstext.innerHTML = rebirthCount;
+        
+        // Voeg upgrade toe aan gekochte lijst
+        purchasedUpgrades.push(upgradeId);
+        
+        // Pas upgrade effect toe
+        applyUpgradeEffect(effect);
+        
+        // Markeer upgrade als gekocht in UI
+        selectedUpgrade.style.opacity = '0.5';
+        selectedUpgrade.style.pointerEvents = 'none';
+        selectedUpgrade.innerHTML += '<br><span style="color: lime;">✓ GEKOCHT</span>';
+        
+        // Toon succes melding
+        showGameNotification(`${upgradeName} gekocht!`, 'success');
+        
+        // Sla game op
+        saveGame();
+        
+        // Sluit shop
         shopPopup.classList.remove('active');
+        setTimeout(() => shopPopup.style.display = 'none', 10);
+        infoBoxElement.style.display = 'none';
+        selectedUpgrade = null;
     });
 }
+
+// Functie om upgrade effecten toe te passen
+function applyUpgradeEffect(effect) {
+    switch(effect) {
+        case 'doubleUpgrade':
+            // Power of the Phoenix: Verdubbelt de BONUS die je krijgt bij rebirth
+            // Dit betekent dat je blackhole bonus 2x zoveel waard is
+            window.phoenixMultiplier = 2;
+            break;
+            
+        case 'cpcBoost':
+            // +100% CPC
+            cpcMultiplier += 1.0;
+            break;
+            
+        case 'cpsBoost':
+            // +50% CPS
+            cpsMultiplier += 0.5;
+            break;
+    }
+}
+
+// Functie om mooie game notificaties te tonen (zoals je oude code)
+function showGameNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = 'game-notification';
+    
+    if (type === 'success') {
+        notification.style.backgroundColor = 'rgba(76, 175, 80, 0.95)';
+        notification.innerHTML = `✓ ${message}`;
+    } else if (type === 'error') {
+        notification.style.backgroundColor = 'rgba(244, 67, 54, 0.95)';
+        notification.innerHTML = `✗ ${message}`;
+    }
+    
+    document.body.appendChild(notification);
+    
+    // Animatie
+    setTimeout(() => notification.classList.add('show'), 10);
+    
+    // Verwijder na 2.5 seconden
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 2500);
+}
+
+// Maak shop menu items klikbaar
+const menuItems = document.querySelectorAll('.menu-item');
+menuItems.forEach((item) => {
+    item.addEventListener('click', function(e) {
+        e.stopPropagation();
+        
+        // Verwijder 'selected' class van alle items
+        menuItems.forEach(i => i.classList.remove('selected'));
+        
+        // Voeg 'selected' class toe aan geklikte item
+        item.classList.add('selected');
+        selectedUpgrade = item;
+        
+        // Update info box met data van het item
+        const title = item.dataset.title;
+        const desc = item.dataset.desc;
+        const price = item.dataset.price;
+        
+        infoTitle.textContent = title;
+        infoDesc.innerHTML = `${desc}<br><br><strong>Prijs: ${price} rebirths</strong>`;
+        
+        console.log('Upgrade geselecteerd:', title);
+    });
+});
 
 // Sluit popup bij klikken buiten content
 if (shopPopup) {
-    shopPopup.addEventListener('click', function (e) {
+    shopPopup.addEventListener('click', function(e) {
         if (e.target === shopPopup) {
             shopPopup.classList.remove('active');
+            setTimeout(() => shopPopup.style.display = 'none', 10);
+            infoBoxElement.style.display = 'none'; // Verberg info box
+            selectedUpgrade = null;
+            // Reset info box
+            infoTitle.textContent = 'Selecteer een upgrade';
+            infoDesc.innerHTML = 'Klik op een item om info te zien.';
         }
     });
 }
@@ -492,27 +607,28 @@ function update(time) {
     // Bereken tijd sinds laatste frame
     let delta = (time - lastTime) / 1000;
     lastTime = time;
-
-    // Bereken totale CPS en voeg coins toe
-    let totalCPS = Object.values(cpsVars).reduce((a, b) => a + b, 0) * (1 + rebirthBonus);
+    
+    // Bereken totale CPS met multipliers en voeg coins toe
+    let baseTotalCPS = Object.values(cpsVars).reduce((a, b) => a + b, 0);
+    let totalCPS = baseTotalCPS * (1 + rebirthBonus) * cpsMultiplier;
     parsedcoin += totalCPS * delta;
-
+    
     // Update UI
     coin.innerHTML = formatNumber(parsedcoin);
-    cpctext.innerHTML = formatNumber(cpc);
+    cpctext.innerHTML = formatNumber(cpc * cpcMultiplier);
     cpstext.innerHTML = formatNumber(totalCPS);
-
+    
     // Update alle upgrade CPS displays
     upgrades.forEach(upg => {
         if (upg.increaseElem) {
             if (upg.type === 'cps') {
-                upg.increaseElem.innerHTML = formatNumber(cpsVars[upg.cpsVar] * (1 + rebirthBonus));
+                upg.increaseElem.innerHTML = formatNumber(cpsVars[upg.cpsVar] * (1 + rebirthBonus) * cpsMultiplier);
             } else {
-                upg.increaseElem.innerHTML = formatNumber(cpc);
+                upg.increaseElem.innerHTML = formatNumber(cpc * cpcMultiplier);
             }
         }
     });
-
+    
     requestAnimationFrame(update);
 }
 
@@ -529,11 +645,14 @@ function saveGame() {
         cpsVars,
         rebirthCount,
         rebirthBonus,
+        purchasedUpgrades,
+        cpcMultiplier,
+        cpsMultiplier,
+        phoenixMultiplier: window.phoenixMultiplier || 1,
         background: normalizeBackgroundString(document.body.style.backgroundImage),
         upgrades: upgrades.map(u => ({ level: u.level, cost: u.cost }))
     };
     localStorage.setItem("clickerSave", JSON.stringify(saveData));
-    saveData.upgradeMultiplier = window.upgradeMultiplier;
 }
 
 // Automatisch opslaan elke 100ms
@@ -542,51 +661,66 @@ setInterval(saveGame, 100);
 function loadGame() {
     const data = localStorage.getItem("clickerSave");
     if (!data) return;
-
+    
     const save = JSON.parse(data);
-
+    
     // Laad game stats
     parsedcoin = save.parsedcoin;
     cpc = save.cpc;
     Object.assign(cpsVars, save.cpsVars);
     rebirthCount = save.rebirthCount;
     rebirthBonus = save.rebirthBonus;
-
+    purchasedUpgrades = save.purchasedUpgrades || [];
+    cpcMultiplier = save.cpcMultiplier || 1;
+    cpsMultiplier = save.cpsMultiplier || 1;
+    window.phoenixMultiplier = save.phoenixMultiplier || 1;
+    
     // Laad achtergrond
     if (save.background) {
         document.body.style.backgroundImage = normalizeBackgroundString(save.background);
         document.body.style.backgroundSize = "cover";
     }
-
+    
     // Laad alle upgrade levels en kosten
     save.upgrades.forEach((s, i) => {
         const upg = upgrades[i];
         if (!upg) return;
-
+        
         upg.level = s.level;
         upg.cost = s.cost;
-
+        
         if (upg.levelElem) upg.levelElem.innerHTML = s.level;
         if (upg.costElem) upg.costElem.innerHTML = formatNumber(s.cost);
         if (upg.increaseElem) {
             if (upg.type === "click") {
-                upg.increaseElem.innerHTML = formatNumber(cpc);
+                upg.increaseElem.innerHTML = formatNumber(cpc * cpcMultiplier);
             } else {
-                upg.increaseElem.innerHTML = formatNumber(cpsVars[upg.cpsVar] * (1 + rebirthBonus));
+                upg.increaseElem.innerHTML = formatNumber(cpsVars[upg.cpsVar] * (1 + rebirthBonus) * cpsMultiplier);
             }
         }
     });
-
+    
     // Laat rebirth knop zien als Blackhole is gekocht
     if (upgrades[14] && upgrades[14].level >= 1) showButton();
-
+    
+    // Markeer gekochte shop upgrades
+    purchasedUpgrades.forEach(upgradeId => {
+        const upgradeElement = document.getElementById(upgradeId);
+        if (upgradeElement) {
+            upgradeElement.style.opacity = '0.5';
+            upgradeElement.style.pointerEvents = 'none';
+            if (!upgradeElement.innerHTML.includes('✓ GEKOCHT')) {
+                upgradeElement.innerHTML += '<br><span style="color: lime;">✓ GEKOCHT</span>';
+            }
+        }
+    });
+    
     // Update UI
     coin.innerHTML = formatNumber(parsedcoin);
-    cpctext.innerHTML = formatNumber(cpc);
-    cpstext.innerHTML = formatNumber(Object.values(cpsVars).reduce((a, b) => a + b, 0) * (1 + rebirthBonus));
+    cpctext.innerHTML = formatNumber(cpc * cpcMultiplier);
+    cpstext.innerHTML = formatNumber(Object.values(cpsVars).reduce((a, b) => a + b, 0) * (1 + rebirthBonus) * cpsMultiplier);
     rebirthstext.innerHTML = rebirthCount;
     updateRebirthBoostDisplay();
-    window.upgradeMultiplier = save.upgradeMultiplier || 1;
 }
 
 // ===================================
