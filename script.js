@@ -138,6 +138,9 @@ window.incrementCoin = function (event) {
     document.body.appendChild(div);
     div.classList.add('fade-up');
     setTimeout(() => div.remove(), 800);
+const audio = new Audio('./assets/coin-257878.mp3');
+audio.playbackRate = 1.5 + Math.random() * 0.2;
+audio.play();
 };
 
 // Koppel click event aan coin afbeelding
