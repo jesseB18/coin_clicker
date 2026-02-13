@@ -225,7 +225,7 @@ function resetGame() {
     
     // Phoenix upgrade: verdubbelt hoeveel rebirths je KRIJGT per rebirth
     const rebirthsGained = window.phoenixMultiplier || 1;
-    rebirthCount += rebirthsGained;
+    rebirthCount = rebirthsGained;
     
     // Reset game stats
     parsedcoin = 0;
